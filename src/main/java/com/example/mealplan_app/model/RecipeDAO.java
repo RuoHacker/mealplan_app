@@ -1,30 +1,41 @@
 package com.example.mealplan_app.model;
 
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Repository
 public class RecipeDAO {
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public JdbcTemplate jdbcTemplate;
+
+    public RecipeDAO(){
+    }
 
     //リポジトリからレシピを削除する関数
-    public void deleteRecipe(Recipe recipe){
-        
+    public boolean deleteRecipe(Recipe recipe){
+        String query = """
+                DELETE FROM recipe_table WHERE id=?
+                """;
+        int isDeleted = jdbcTemplate.update(query, recipe.getId());
+        return isDeleted > 0;
     }
     //リポジトリにレシピを挿入する関数
-    public void insertRecipe(Recipe recipe){
-        
+    public boolean insertRecipe(Recipe recipe){
+        String query = """
+                INSERT INTO recipe_table (id, name, url)
+                VALUES (?, ?)
+                """;
+        int isInserted = jdbcTemplate.update(query,recipe.getName(), recipe.getUrl());
+        return isInserted > 0;
     }
 
     //リポジトリから引数で探したレシピを探す関数
     public Map<String, Object> findRecipe(int id){
 
         String query = """
-                SELECT * FROM recipe_table WHERE user_id=? 
+                SELECT * FROM recipe_table WHERE id=? 
                 """;
 
         Map<String, Object> recipe = jdbcTemplate.queryForMap(query,id);
@@ -32,4 +43,11 @@ public class RecipeDAO {
         return recipe;
     }
 
+    public List<Map<String, Object>> findAllRecipe(){
+        String query = """
+                SELECT * FROM recipe_table""";
+
+        List<Map<String, Object>> recipe = jdbcTemplate.queryForList(query);
+        return recipe;
+    }
 }

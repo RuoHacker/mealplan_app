@@ -20,22 +20,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.ui.Model;
 
-import com.example.mealplan_app.model.Menu;
 import com.example.mealplan_app.model.Recipe;
+import com.example.mealplan_app.service.*;
 
 @Controller
 public class MealplanAppController {
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    FindAllRecipeLogic findAllRecipeLogic;
+    @Autowired
+    InsertRecipeLogic insertRecipeLogic;
+    @Autowired
+    DeleteRecipeLogic deleteRecipeLogic;
 
-    
     private String[] wday = {"日", "月", "火", "水", "木","金", "土"};
     // public m_Menu menu = new m_Menu();
 
     @RequestMapping("/home")
     public String home(Model model){
-        String sql = "SELECT * FROM recipe_table";
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        
+        List<Map<String, Object>> list = findAllRecipeLogic.findAllRecipe();
         model.addAttribute("recipelist",list);
         // model.addAttribute("wday", wday);
         // model.addAttribute("recipe", recipes);
@@ -45,10 +48,8 @@ public class MealplanAppController {
 
     @RequestMapping(value="/home", params = "random", method = RequestMethod.POST)
     public String randomSelect(Model model){
-        System.out.println("PUT Random");
-        String sql = "SELECT * FROM recipe_table";
         Random random = new Random();
-        List<Map<String, Object>> recipelist = jdbcTemplate.queryForList(sql);
+        List<Map<String, Object>> recipelist = findAllRecipeLogic.findAllRecipe();
 
 
         // for(var list: recipelist){
@@ -59,7 +60,7 @@ public class MealplanAppController {
             int recipeNo = random.nextInt(recipelist.size());
             String recipeName = (String)recipelist.get(recipeNo).get("name");
             String recipeUrl = (String)recipelist.get(recipeNo).get("url");
-            kondate.add(new Recipe(i, recipeName, recipeUrl));
+            kondate.add(new Recipe(recipeName, recipeUrl));
 
         }
         model.addAttribute("recipelist", recipelist);
@@ -72,12 +73,9 @@ public class MealplanAppController {
     @RequestMapping(path="/input", method= RequestMethod.POST)
     public String recipeSubmit(@ModelAttribute("recipe") Recipe recipe, Model model){
         System.out.println(recipe.getName());
-        int rowNumber = jdbcTemplate.update("INSERT INTO recipe_table(name, url) VALUES(?,?)", 
-                        recipe.getName(),
-                         recipe.getUrl());
+        boolean isInserted = insertRecipeLogic.insertRecipe(new Recipe(recipe.getName(), recipe.getUrl()));
         
-        System.out.println(rowNumber);
-        return "home";
+        return "redirect:home";
     }
     
 

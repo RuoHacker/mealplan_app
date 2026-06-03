@@ -17,8 +17,7 @@ public class Recipe {
         this.name = "";
         this.url = "";
     }
-    public Recipe(int id, String name, String url){
-        this.id = id;
+    public Recipe(String name, String url){
         this.name = name;
         this.url = url;
     }
