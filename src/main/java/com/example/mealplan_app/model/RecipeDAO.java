@@ -14,28 +14,37 @@ public class RecipeDAO {
     }
 
     //リポジトリからレシピを削除する関数
-    public boolean deleteRecipe(Recipe recipe){
+    public boolean deleteRecipe(int id){
         String query = """
                 DELETE FROM recipe_table WHERE id=?
                 """;
-        int isDeleted = jdbcTemplate.update(query, recipe.getId());
+        int isDeleted = jdbcTemplate.update(query, id);
         return isDeleted > 0;
     }
     //リポジトリにレシピを挿入する関数
     public boolean insertRecipe(Recipe recipe){
         String query = """
-                INSERT INTO recipe_table (id, name, url)
+                INSERT INTO recipe_table(name, url)
                 VALUES (?, ?)
                 """;
         int isInserted = jdbcTemplate.update(query,recipe.getName(), recipe.getUrl());
         return isInserted > 0;
     }
 
+    public boolean updateRecipe(Recipe recipe){
+        String query = """
+                UPDATE recipe_table
+                SET name=?, url=?
+                WHERE id=?
+                """;
+        int isUpdated = jdbcTemplate.update(query, recipe.getName(), recipe.getUrl(), recipe.getId());
+        return isUpdated > 0;
+    }
     //リポジトリから引数で探したレシピを探す関数
     public Map<String, Object> findRecipe(int id){
 
         String query = """
-                SELECT * FROM recipe_table WHERE id=? 
+                SELECT id, name, url FROM recipe_table WHERE id=? 
                 """;
 
         Map<String, Object> recipe = jdbcTemplate.queryForMap(query,id);
@@ -45,7 +54,7 @@ public class RecipeDAO {
 
     public List<Map<String, Object>> findAllRecipe(){
         String query = """
-                SELECT * FROM recipe_table""";
+                SELECT id, name, url FROM recipe_table""";
 
         List<Map<String, Object>> recipe = jdbcTemplate.queryForList(query);
         return recipe;

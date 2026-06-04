@@ -1,25 +1,17 @@
 package com.example.mealplan_app;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-//SQL
-// import java.sql.Connection;
-// import java.sql.DriverManager;
-// import java.sql.Statement;
-// import java.sql.SQLException;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.ui.Model;
-
+import org.springframework.web.bind.annotation.RequestParam;
 import com.example.mealplan_app.model.Recipe;
 import com.example.mealplan_app.service.*;
 
@@ -31,35 +23,30 @@ public class MealplanAppController {
     InsertRecipeLogic insertRecipeLogic;
     @Autowired
     DeleteRecipeLogic deleteRecipeLogic;
+    @Autowired
+    UpdateRecipeLogic updateRecipeLogic;
 
-    private String[] wday = {"日", "月", "火", "水", "木","金", "土"};
-    // public m_Menu menu = new m_Menu();
+    private String[] wday = { "日", "月", "火", "水", "木", "金", "土" };
 
     @RequestMapping("/home")
-    public String home(Model model){
-        
+    public String home(Model model) {
+
         List<Map<String, Object>> list = findAllRecipeLogic.findAllRecipe();
-        model.addAttribute("recipelist",list);
-        // model.addAttribute("wday", wday);
-        // model.addAttribute("recipe", recipes);
-        // model.addAttribute("menu", menu);
+        model.addAttribute("recipelist", list);
+
         return "home";
     }
 
-    @RequestMapping(value="/home", params = "random", method = RequestMethod.POST)
-    public String randomSelect(Model model){
+    @RequestMapping(value = "/home", params = "random", method = RequestMethod.POST)
+    public String randomSelect(Model model) {
         Random random = new Random();
         List<Map<String, Object>> recipelist = findAllRecipeLogic.findAllRecipe();
 
-
-        // for(var list: recipelist){
-        //     System.out.println(list.get("name"));
-        // }
         List<Recipe> kondate = new ArrayList<Recipe>();
-        for(int i = 0; i < 7; i++){
+        for (int i = 0; i < 7; i++) {
             int recipeNo = random.nextInt(recipelist.size());
-            String recipeName = (String)recipelist.get(recipeNo).get("name");
-            String recipeUrl = (String)recipelist.get(recipeNo).get("url");
+            String recipeName = (String) recipelist.get(recipeNo).get("name");
+            String recipeUrl = (String) recipelist.get(recipeNo).get("url");
             kondate.add(new Recipe(recipeName, recipeUrl));
 
         }
@@ -70,22 +57,31 @@ public class MealplanAppController {
         return "home";
     }
 
-    @RequestMapping(path="/input", method= RequestMethod.POST)
-    public String recipeSubmit(@ModelAttribute("recipe") Recipe recipe, Model model){
+    @RequestMapping(path = "/input", method = RequestMethod.POST)
+    public String recipeSubmit(@ModelAttribute("recipe") Recipe recipe, Model model) {
         System.out.println(recipe.getName());
         boolean isInserted = insertRecipeLogic.insertRecipe(new Recipe(recipe.getName(), recipe.getUrl()));
-        
+
         return "redirect:home";
     }
-    
 
     @RequestMapping(path = "/input", method = RequestMethod.GET)
-    public String input(Model model){
+    public String input(Model model) {
         model.addAttribute("recipe", new Recipe());
         return "input";
     }
 
+    @RequestMapping(path = "/delete", method = RequestMethod.GET)
+    public String delete(@RequestParam("id") Long id, Model model) {
+        boolean isDeleted = deleteRecipeLogic.deleteRecipe(id.intValue());
+        return "redirect:home"; 
+    }
+
+    @RequestMapping(path = "/update", method = RequestMethod.POST)
+    public String update(@ModelAttribute("recipe") Recipe recipe, Model model) {
+        boolean isUpdated = updateRecipeLogic.updateRecipe(recipe);
+        return "redirect:home";
+    }
 
 
-    
 }
