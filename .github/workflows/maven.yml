@@ -15,16 +15,36 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
+
+    # 横でMySQLコンテナを起動する設定を追加
+    services:
+      mysql:
+        image: mysql:8.0 # 利用しているバージョンに合わせてください
+        env:
+          MYSQL_DATABASE: spring_test # お使いのデータベース名
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes' # パスワードを空にする場合
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
         with:
-          distribution: 'temurin' # See 'Supported distributions' for available options
+          distribution: 'temurin'
           java-version: '25'
           cache: maven
+
       - name: Build with Maven
+        # アプリ側が必要とするDB接続情報を環境変数で注入
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/mealplan_db
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: ""
         run: mvn --batch-mode --update-snapshots verify
-      - run: mkdir staging && cp target/* .jar staging
+
+      # タイポを修正（target/*.jar staging/ に変更）
+      - run: mkdir staging && cp target/*.jar staging/
       - uses: actions/upload-artifact@v4
         with:
           name: Package
