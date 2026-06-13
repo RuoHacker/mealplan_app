@@ -16,7 +16,7 @@ jobs:
   test:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@4
+      - uses: actions/checkout@6
       - uses: actions/setup-java@4
         with:
           distribution: temurin
