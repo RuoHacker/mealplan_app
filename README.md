@@ -65,17 +65,14 @@ mvn spring-boot:run
 ### Pattern 1: ソースコードからビルドして実行
 
 1. **リポジトリのクローン**
-   ```bash
-
-'''bash 
+``` 
 git clone git@github.com:RuoHacker/mealplan_app.git
 cd mealplan_app
-'''
+```
 2. アプリケーションの起動
-
-'''bash
+```
 mvn spring-boot:run
-'''
+```
 💡 注意: 事前に MySQL 8.0 が起動しており、アプリケーションの設定ファイル（application.properties 等）に正しい接続情報が記載されていることを確認してください。
 
 ### Pattern 2: パッケージ（JARファイル）から実行
