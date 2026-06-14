@@ -16,13 +16,13 @@ jobs:
   test:
     runs-on: ubuntu-22.04
 
-    # 横でMySQLコンテナを起動する設定を追加
+    # application.properties に合わせて MySQL を起動
     services:
       mysql:
-        image: mysql:8.0 # 利用しているバージョンに合わせてください
+        image: mysql:8.0
         env:
-          MYSQL_DATABASE: spring_test # お使いのデータベース名
-          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes' # パスワードを空にする場合
+          MYSQL_DATABASE: spring_test  # propertiesのDB名に合わせる
+          MYSQL_ROOT_PASSWORD: toor     # propertiesのパスワードに合わせる
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -36,14 +36,9 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        # アプリ側が必要とするDB接続情報を環境変数で注入
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/mealplan_db
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: ""
         run: mvn --batch-mode --update-snapshots verify
 
-      # タイポを修正（target/*.jar staging/ に変更）
+      # 前回のコピー処理のタイポも修正しています
       - run: mkdir staging && cp target/*.jar staging/
       - uses: actions/upload-artifact@v4
         with:
